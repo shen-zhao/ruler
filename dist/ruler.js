@@ -43,7 +43,7 @@
     } else {
         global.Ruler = factory();
     }
-}(this, function () {
+}(window, function () {
     'use strict';
     var Ruler = function(params) {
         this.container = null;
@@ -106,9 +106,17 @@
             this.container.appendChild(canvas);
         };
 
+        var getStyle = function(element,attr) {
+            if(element.currentStyle){   //针对ie获取非行间样式
+                return parseInt(element.currentStyle[attr]);
+            }else{
+                return parseInt(getComputedStyle(element,false)[attr]);   //针对非ie
+            };
+        }
+
         //判断线宽计算容器宽
         this.calcWidth = function() {
-            var width = _params.width ? _params.width : Ruler.getStyle(this.container, 'width');
+            var width = _params.width ? _params.width : getStyle(this.container, 'width');
             return _params.lineWidth % 2 ? parseInt(width / 2) * 2 : parseInt(width / 2) * 2 + 1;
         }
 
@@ -272,13 +280,6 @@
             }
         };
         this.init();
-    }
-    Ruler.getStyle = function(element,attr) {
-        if(element.currentStyle){   //针对ie获取非行间样式
-            return parseInt(element.currentStyle[attr]);
-        }else{
-            return parseInt(getComputedStyle(element,false)[attr]);   //针对非ie
-        };
     }
     return Ruler;
 }));
