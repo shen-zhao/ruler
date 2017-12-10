@@ -1,0 +1,25 @@
+{
+  "name": "ruler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ruler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shen-zhao/ruler.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shen-zhao/ruler/issues"
+  },
+  "homepage": "https://github.com/shen-zhao/ruler#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-minify": "^2.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglyfly": "^1.4.2"
+  }
+}
