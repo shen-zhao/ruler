@@ -117,7 +117,7 @@
         //判断线宽计算容器宽
         this.calcWidth = function() {
             var width = _params.width ? _params.width : getStyle(this.container, 'width');
-            return _params.lineWidth % 2 ? parseInt(width / 2) * 2 : parseInt(width / 2) * 2 + 1;
+            return _params.lineWidth % 2 ? parseInt(width / 2) * 2 : parseInt(width / 2) * 2 - 1;
         }
 
         /**
