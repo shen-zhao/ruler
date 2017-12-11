@@ -43,7 +43,7 @@
     } else {
         global.Ruler = factory();
     }
-}(window, function () {
+}(this, function () {
     'use strict';
     var Ruler = function(params) {
         this.container = null;
@@ -74,14 +74,16 @@
             endCallback: function() {
                 //arguments: this
             }
-        };
+        },
+        //获取dpr
+        devicePixelRatio = window.devicePixelRatio;
         //对象合并
         Object.assign(_params, params);
         //初始化
         this.init = function() {
             this.container = document.querySelector(_params.container);
             this.showWrap = document.querySelector(_params.showWrap);
-            this.width = this.calcWidth();
+            this.width = _params.width ? _params.width : Ruler.getStyle(this.container, 'width');
             this.container.style.width = this.width + 'px';
             this.container.style.WebkitTransform = 'translateZ(0)';
             this.container.style.overflow = 'hidden';
@@ -89,8 +91,12 @@
             this.range = (_params.max - _params.min) / _params.unit;
 
             var canvas = document.createElement('canvas');
-            canvas.width = this.range * _params.stepWidth + this.width;
-            canvas.height = _params.height;
+            //canvas放大dpr倍，使之为物理像素
+            canvas.width = this.calc(this.range * _params.stepWidth + this.width);
+            canvas.height = this.calc(_params.height);
+            //canvas设置css大小
+            canvas.style.width = this.range * _params.stepWidth + this.width + 'px';
+            canvas.style.height = _params.height + 'px';
             this.canvas = canvas;
             this.ctx = canvas.getContext('2d');
             //位移、刻度初始化
@@ -106,18 +112,9 @@
             this.container.appendChild(canvas);
         };
 
-        var getStyle = function(element,attr) {
-            if(element.currentStyle){   //针对ie获取非行间样式
-                return parseInt(element.currentStyle[attr]);
-            }else{
-                return parseInt(getComputedStyle(element,false)[attr]);   //针对非ie
-            };
-        }
-
-        //判断线宽计算容器宽
-        this.calcWidth = function() {
-            var width = _params.width ? _params.width : getStyle(this.container, 'width');
-            return _params.lineWidth % 2 ? parseInt(width / 2) * 2 : parseInt(width / 2) * 2 - 1;
+        //计算
+        this.calc = function(val) {
+            return val * devicePixelRatio;
         }
 
         /**
@@ -147,6 +144,8 @@
                 this.ctx.save();
                 this.ctx.lineWidth = _params.lineWidth;
                 this.ctx.strokeStyle = _params.basicColor;
+                //放大dpr倍，在起笔之前
+                this.ctx.scale(devicePixelRatio, devicePixelRatio);
 
                 this.ctx.translate(this.width / 2 + _params.stepWidth * i, _params.height);
                 
@@ -168,8 +167,11 @@
             //默认数字
             for(i = 0; i <= this.range; i++) {
                 this.ctx.save();
-                this.ctx.font = "10px Arial";
+                this.ctx.font = "10px";
                 this.ctx.fillStyle = _params.basicColor;
+                //放大dpr倍，在起笔之前
+                this.ctx.scale(devicePixelRatio, devicePixelRatio);
+
                 if(i%10 === 0) {
                     let text = _params.min + num1 * _params.unit * 10;
                     this.ctx.translate(-(this.ctx.measureText(text).width) / 2, 0);
@@ -183,6 +185,8 @@
                 this.ctx.save();
                 this.ctx.lineWidth = _params.lineWidth;
                 this.ctx.strokeStyle = _params.checkedColor;
+                //放大dpr倍，在起笔之前
+                this.ctx.scale(devicePixelRatio, devicePixelRatio);
 
                 this.ctx.translate(this.width / 2 + _params.stepWidth * i, _params.height);
                 
@@ -204,8 +208,10 @@
             //实时数字
             for(i = 0; i <= scale; i++) {
                 this.ctx.save();
-                this.ctx.font = "10px Arial";
+                this.ctx.font = "10px";
                 this.ctx.fillStyle = _params.textColor;
+                //放大dpr倍，在起笔之前
+                this.ctx.scale(devicePixelRatio, devicePixelRatio);
                 
                 if(i%10 === 0) {
                     let text = _params.min + num2 * _params.unit * 10;
@@ -237,7 +243,7 @@
                     diffX = mx - sx,
                     newX = _that.translateX = nowX + diffX;
                 
-                if(_that.translateX <= 0 && _that.translateX >= -(_that.canvas.width - _that.width + 1)) {
+                if(_that.translateX <= 0 && _that.translateX >= -(_that.canvas.width / devicePixelRatio - _that.width + 1)) {
                     _that.conversion(_that.translateX, true);
                     _that.draw(_that.score);
                 }
@@ -245,7 +251,7 @@
                     _that.conversion(0, true);
                     _that.draw(0);
                 } else {
-                    _that.conversion(_that.range, true);
+                    _that.conversion(_that.range * _params.stepWidth, true);
                     _that.draw(_that.range);
                 }
                 _that.assignment();
@@ -256,8 +262,8 @@
                 _that.canvas.style.transition = 'transform 0.2s';
                 if(_that.translateX >= 0) {
                     _that.translateX = 0;
-                } else if(_that.translateX < -(_that.canvas.width - _that.width)) {
-                    _that.translateX = -(_that.canvas.width - _that.width);
+                } else if(_that.translateX < -((_that.canvas.width / devicePixelRatio) - _that.width)) {
+                    _that.translateX = -((_that.canvas.width / devicePixelRatio) - _that.width);
                 } else {
                     _that.translateX = -Math.floor(-_that.translateX / _params.stepWidth) * _params.stepWidth;
                 }
@@ -280,6 +286,13 @@
             }
         };
         this.init();
+    }
+    Ruler.getStyle = function(element,attr) {
+        if(element.currentStyle){   //针对ie获取非行间样式
+            return parseInt(element.currentStyle[attr]);
+        }else{
+            return parseInt(getComputedStyle(element,false)[attr]);   //针对非ie
+        };
     }
     return Ruler;
 }));
