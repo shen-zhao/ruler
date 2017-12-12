@@ -243,7 +243,7 @@
                     diffX = mx - sx,
                     newX = _that.translateX = nowX + diffX;
                 
-                if(_that.translateX <= 0 && _that.translateX >= -(_that.canvas.width / devicePixelRatio - _that.width + 1)) {
+                if(_that.translateX <= 0 && _that.translateX >= -(_that.range * _params.stepWidth + 1)) {
                     _that.conversion(_that.translateX, true);
                     _that.draw(_that.score);
                 }
@@ -262,8 +262,8 @@
                 _that.canvas.style.transition = 'transform 0.2s';
                 if(_that.translateX >= 0) {
                     _that.translateX = 0;
-                } else if(_that.translateX < -((_that.canvas.width / devicePixelRatio) - _that.width)) {
-                    _that.translateX = -((_that.canvas.width / devicePixelRatio) - _that.width);
+                } else if(_that.translateX < -(_that.range * _params.stepWidth)) {
+                    _that.translateX = -(_that.range * _params.stepWidth);
                 } else {
                     _that.translateX = -Math.floor(-_that.translateX / _params.stepWidth) * _params.stepWidth;
                 }
